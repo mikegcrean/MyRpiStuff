@@ -1,0 +1,87 @@
+Somagic USB Grabber Somagic, Inc. SMI Grabber EasyCAP DC60+ clone ID 1c88:0007 [SMI-2021CBE]
+When the driver is installed (sudo somagic-init) the ID will change to ID 1c88:003f
+============================================================================================
+
+Make sure the system is fully upto date.
+sudo apt-get update
+sudo apt-get full-upgrade
+----------------------------------------
+I have only had success using a Raspberry Pi 4B+ with 4 gb RAM
+I did try a 2 gb version but it seemed to have a lot of framing errors. It could have been a faulty Rpi !.
+----------------------------------------------------------------------------------------------------------
+I put all the somagic and driver files in a folder named sm
+
+sudo apt-get update
+sudo apt-get install mplayer
+cd /home/pi/sm/somagic-easycap_1.1
+make
+
+make: Nothing to be done for 'all'.
+
+sudo make install
+
+mkdir -p /usr/local/bin
+install somagic-init somagic-capture /usr/local/bin/
+mkdir -p /usr/local/share/man/man1
+install man/somagic-init.1 man/somagic-capture.1 /usr/local/share/man/man1/
+
+cd ~
+cd /home/pi/sm/somagic-easycap-tools_1.1
+
+make
+
+make: Nothing to be done for 'all'.
+
+sudo make install
+
+mkdir -p /usr/local/bin
+install somagic-extract-firmware /usr/local/bin/
+mkdir -p /usr/local/share/man/man1
+install man/somagic-extract-firmware.1 /usr/local/share/man/man1/
+
+cd ~
+cd /home/pi/sm/firmware
+sudo somagic-extract-firmware SmiUsbGrabber3F.sys
+Firmware written to '/lib/firmware/somagic_firmware.bin'.
+
+sudo somagic-init
+lsusb
+
+Bus 001 Device 009: ID 1c88:003f Somagic, Inc. 
+
+To make a auto run bin file (play.sh). In the sm folder create a text file with the following in it.
+cd /home/pi/sm
+
+#!/bin/sh
+sudo somagic-init
+sudo somagic-capture | mplayer -vf yadif,screenshot -demuxer rawvideo -rawvideo "pal:format=uyvy:fps=25" -aspect 4:3 -
+
+Svae it and make the file exicutable.
+
+chmod +x play.sh
+
+You can run it with.
+
+./play.sh
+
+****************************************************************************************************************
+
+Use the following for testing.
+
+sudo somagic-init
+somagic-capture --help
+
+FOR PAL
+-------
+
+sudo somagic-capture | mplayer -vf yadif,screenshot -demuxer rawvideo -rawvideo "pal:format=uyvy:fps=25" -aspect 4:3 -
+
+FOR NTSC
+--------
+
+sudo somagic-capture -n -s | mplayer -vf yadif,screenshot -demuxer rawvideo -rawvideo "ntsc:format=uyvy:fps=30000/1001" -aspect 4:3 -
+
+ERROR's
+-------
+
+Some times the dispay will be jittery. Try quitting mplayer and re running from the command line.
